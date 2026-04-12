@@ -11,6 +11,7 @@
     <modules>
         <module>ms_usuario</module>
         <module>ms_libros</module>
+        <module>api_gateway</module>
     </modules>
 
     <properties>
