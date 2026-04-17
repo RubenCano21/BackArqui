@@ -11,7 +11,7 @@ import java.util.Properties;
  *
  * Configuración en application.properties:
  *   route.<nombre>.path   = prefijo del gateway  (ej: /api/usuarios)
- *   route.<nombre>.target = URL base del ms       (ej: http://localhost:8081)
+ *   route.<nombre>.target = URL base del ms       (ej: <a href="http://localhost:8081">...</a>)
  */
 public class RouterConfig {
 

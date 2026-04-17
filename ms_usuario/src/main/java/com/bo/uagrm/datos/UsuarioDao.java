@@ -26,7 +26,7 @@ public class UsuarioDao {
     }
 
     // Listar Usuarios
-    public List<Usuario> listar() throws Exception {
+    public List<Usuario> listarUsuario() throws Exception {
         List<Usuario> lista = new ArrayList<>();
         String sql = "SELECT * FROM usuarios";
 
@@ -42,7 +42,7 @@ public class UsuarioDao {
     }
 
     // Buscar Usuario por ID
-    public Usuario buscarPorId(Long id) throws Exception {
+    public Usuario buscarUsuarioPorId(Long id) throws Exception {
         String sql = "SELECT * FROM usuarios WHERE id = ?";
         try (Connection conn = ConnectionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)){
@@ -57,7 +57,7 @@ public class UsuarioDao {
     }
 
     // Buscar Usuario por Email (case-insensitive)
-    public Usuario buscarPorEmail(String email) throws Exception {
+    public Usuario buscarUsuarioPorEmail(String email) throws Exception {
         String sql = "SELECT * FROM usuarios WHERE LOWER(email) = LOWER(?)";
         try (Connection conn = ConnectionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -93,7 +93,7 @@ public class UsuarioDao {
     }
 
     // Registrar Usuario
-    public boolean registrar(Usuario nuevo) throws Exception {
+    public boolean registrarUsuario(Usuario nuevo) throws Exception {
         String sql = "INSERT INTO usuarios(ci, nombre, apellido, email, telefono, fecha_nac, genero, estado) " +
                         "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try ( Connection conn = ConnectionDB.getConnection();
@@ -111,7 +111,7 @@ public class UsuarioDao {
     }
 
     // Actualizar Usuario
-    public boolean actualizar(Usuario usuario) throws Exception {
+    public boolean actualizarUsuario(Usuario usuario) throws Exception {
         String sql = "UPDATE usuarios SET ci = ?, nombre = ?, apellido = ?, email = ?, " +
                 "telefono = ?, fecha_nac = ?, genero = ?, estado = ? WHERE id = ?";
         try (Connection conn = ConnectionDB.getConnection();
@@ -145,7 +145,7 @@ public class UsuarioDao {
     }
 
     // Eliminar Usuario (solo ADMIN puede hacerlo)
-    public boolean eliminar(Long id, Long solicitanteId) throws Exception {
+    public boolean eliminarUsuario(Long id, Long solicitanteId) throws Exception {
         if (!tieneRolAdmin(solicitanteId)) {
             throw new SecurityException("Solo los usuarios con rol ADMIN pueden eliminar usuarios");
         }

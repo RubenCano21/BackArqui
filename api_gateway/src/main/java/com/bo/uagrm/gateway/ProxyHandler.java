@@ -38,7 +38,7 @@ public class ProxyHandler implements HttpHandler {
     /** Prefijo que registra el gateway, ej: /api/usuarios */
     private final String gatewayPrefix;
 
-    /** URL base del microservicio destino, ej: http://localhost:8081 */
+    /** URL base del microservicio destino, ej: <a href="http://localhost:8081">...</a> */
     private final String targetBase;
 
     public ProxyHandler(String gatewayPrefix, String targetBase) {

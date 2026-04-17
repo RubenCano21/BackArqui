@@ -59,3 +59,5 @@ public class GatewayServer {
     }
 }
 
+// El diseño debe ser totalmente independiente de cada CU,
+// no importa si el CU depende de otros CU

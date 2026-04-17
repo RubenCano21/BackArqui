@@ -40,16 +40,16 @@ public class UsuarioController implements HttpHandler {
             }
 
             switch (method) {
-                case "GET"    -> handleGet(exchange, id);
+                case "GET"    -> handleUsuarioGet(exchange, id);
                 case "POST"   -> {
                     if (isLoginPath) {
                         handleLogin(exchange);
                     } else {
-                        handlePost(exchange);
+                        handleUsuarioPost(exchange);
                     }
                 }
-                case "PUT"    -> handlePut(exchange, id);
-                case "DELETE" -> handleDelete(exchange, id);
+                case "PUT"    -> handleUsuarioPut(exchange, id);
+                case "DELETE" -> handleUsuarioDelete(exchange, id);
                 default       -> sendResponse(exchange, 405, "{\"error\":\"Método no permitido\"}");
             }
         } catch (AuthException e) {
@@ -68,9 +68,9 @@ public class UsuarioController implements HttpHandler {
 
 
     // GET
-    private void handleGet(HttpExchange exchange, Long id) throws Exception {
+    private void handleUsuarioGet(HttpExchange exchange, Long id) throws Exception {
         if (id == null){
-            List<Usuario> lista = usuarioN.listar();
+            List<Usuario> lista = usuarioN.listarUsuarios();
             sendResponse(exchange, 200, mapper.writeValueAsString(lista));
         } else {
             Usuario usuario = usuarioN.buscarPorId(id);
@@ -79,9 +79,9 @@ public class UsuarioController implements HttpHandler {
     }
 
     // POST
-    private void handlePost(HttpExchange exchange) throws Exception {
+    private void handleUsuarioPost(HttpExchange exchange) throws Exception {
         Usuario nuevo = readBody(exchange, Usuario.class);
-        boolean creado = usuarioN.registrar(nuevo);
+        boolean creado = usuarioN.registrarUsuario(nuevo);
         sendResponse(exchange, 201, mapper.writeValueAsString(creado));
     }
 
@@ -93,19 +93,19 @@ public class UsuarioController implements HttpHandler {
     }
 
     // PUT
-    private void handlePut(HttpExchange exchange, Long id) throws Exception {
+    private void handleUsuarioPut(HttpExchange exchange, Long id) throws Exception {
         if (id == null){
             sendResponse(exchange, 400, jsonError(" Se requiere el ID en la URL"));
             return;
         }
         Usuario datos = readBody(exchange, Usuario.class);
         datos.setId(id);
-        boolean actualizado = usuarioN.actualizar(datos);
+        boolean actualizado = usuarioN.actualizarUsuario(datos);
         sendResponse(exchange, 200, mapper.writeValueAsString(actualizado));
     }
 
     // DELETE
-    private void handleDelete(HttpExchange exchange, Long id) {
+    private void handleUsuarioDelete(HttpExchange exchange, Long id) {
         if (id == null) {
             try {
                 sendResponse(exchange, 400, jsonError("Se requiere el ID en la URL"));
@@ -120,7 +120,7 @@ public class UsuarioController implements HttpHandler {
             solicitanteId = Long.parseLong(headerSolicitante);
         }
         try {
-            boolean eliminado = usuarioN.eliminar(id, solicitanteId);
+            boolean eliminado = usuarioN.eliminarUsuario(id, solicitanteId);
             sendResponse(exchange, 200, mapper.writeValueAsString(eliminado));
         } catch (SecurityException e) {
             try {

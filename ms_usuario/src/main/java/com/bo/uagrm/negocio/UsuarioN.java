@@ -11,12 +11,12 @@ public class UsuarioN {
 
     private final UsuarioDao dao = new UsuarioDao();
 
-    public List<Usuario> listar() throws Exception {
-        return dao.listar();
+    public List<Usuario> listarUsuarios() throws Exception {
+        return dao.listarUsuario();
     }
 
     public Usuario buscarPorId(Long id) throws Exception {
-        return dao.buscarPorId(id);
+        return dao.buscarUsuarioPorId(id);
     }
 
     public LoginResponse login(LoginRequest request) throws Exception {
@@ -31,7 +31,7 @@ public class UsuarioN {
             throw new IllegalArgumentException("Email y password son obligatorios");
         }
 
-        Usuario usuario = dao.buscarPorEmail(email);
+        Usuario usuario = dao.buscarUsuarioPorEmail(email);
         if (usuario == null) {
             throw new AuthException("Credenciales invalidas");
         }
@@ -55,18 +55,18 @@ public class UsuarioN {
     }
 
 
-    public boolean registrar(Usuario nuevo) throws Exception{
-        return dao.registrar(nuevo);
+    public boolean registrarUsuario(Usuario nuevo) throws Exception{
+        return dao.registrarUsuario(nuevo);
     }
 
-    public boolean actualizar(Usuario nuevo) throws Exception {
-        return dao.actualizar(nuevo);
+    public boolean actualizarUsuario(Usuario nuevo) throws Exception {
+        return dao.actualizarUsuario(nuevo);
     }
 
-    public boolean eliminar(Long id, Long solicitanteId) throws Exception {
+    public boolean eliminarUsuario(Long id, Long solicitanteId) throws Exception {
         if (solicitanteId == null) {
             throw new IllegalArgumentException("Se requiere el header X-Usuario-Id para esta operacion");
         }
-        return dao.eliminar(id, solicitanteId);
+        return dao.eliminarUsuario(id, solicitanteId);
     }
 }
