@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourcePerFileMappings">
+    <file url="file://$PROJECT_DIR$/ms_libros/src/main/java/com/bo/uagrm/datos/LibroDao.java" value="3f79674c-911a-4735-b571-0992253c0974" />
     <file url="file://$PROJECT_DIR$/ms_usuario/src/main/java/com/bo/uagrm/datos/UsuarioDao.java" value="2e13a077-a119-4ff9-a6b5-da55a7f6abda" />
   </component>
 </project>

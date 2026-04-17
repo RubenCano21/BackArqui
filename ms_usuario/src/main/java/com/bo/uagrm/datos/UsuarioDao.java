@@ -144,11 +144,8 @@ public class UsuarioDao {
         }
     }
 
-    // Eliminar Usuario (solo ADMIN puede hacerlo)
-    public boolean eliminarUsuario(Long id, Long solicitanteId) throws Exception {
-        if (!tieneRolAdmin(solicitanteId)) {
-            throw new SecurityException("Solo los usuarios con rol ADMIN pueden eliminar usuarios");
-        }
+    // Eliminar Usuario - la validación de rol ADMIN la realiza el API Gateway de forma centralizada
+    public boolean eliminarUsuario(Long id) throws Exception {
         String sql = "DELETE FROM usuarios WHERE id = ?";
         try (Connection conn = ConnectionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

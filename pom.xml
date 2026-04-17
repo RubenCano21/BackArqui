@@ -9,6 +9,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
+        <module>ms_commons</module>  <!-- debe compilarse primero -->
         <module>ms_usuario</module>
         <module>ms_libros</module>
         <module>api_gateway</module>

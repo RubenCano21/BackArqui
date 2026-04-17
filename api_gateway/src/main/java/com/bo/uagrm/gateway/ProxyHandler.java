@@ -20,6 +20,10 @@ import java.util.Set;
  * Handler genérico de proxy reverso.
  * Recibe una petición del cliente, la reenvía al microservicio destino
  * conservando método, headers y body, y devuelve la respuesta al cliente.
+ *
+ * Incluye validación centralizada de roles:
+ *   antes de reenviar, consulta SecurityConfig para saber si la ruta
+ *   requiere un rol específico y delega la verificación a RoleValidator.
  */
 public class ProxyHandler implements HttpHandler {
 
@@ -38,12 +42,21 @@ public class ProxyHandler implements HttpHandler {
     /** Prefijo que registra el gateway, ej: /api/usuarios */
     private final String gatewayPrefix;
 
-    /** URL base del microservicio destino, ej: <a href="http://localhost:8081">...</a> */
+    /** URL base del microservicio destino, ej: http://localhost:8081 */
     private final String targetBase;
+
+    /**
+     * Validador de roles: consulta ms_usuario para verificar permisos.
+     * Se instancia apuntando siempre al ms_usuario (donde viven los roles).
+     */
+    private final RoleValidator roleValidator;
 
     public ProxyHandler(String gatewayPrefix, String targetBase) {
         this.gatewayPrefix = gatewayPrefix;
         this.targetBase    = targetBase.replaceAll("/+$", "");
+        // El ms_usuario siempre está en la ruta /api/usuarios → http://localhost:8081
+        String usuariosUrl = RouterConfig.getRoutes().getOrDefault("/api/usuarios", "http://localhost:8081");
+        this.roleValidator = new RoleValidator(usuariosUrl);
     }
 
     @Override
@@ -57,6 +70,25 @@ public class ProxyHandler implements HttpHandler {
             sendCorsPreflightResponse(exchange);
             return;
         }
+
+        // ── Validación centralizada de roles ─────────────────────────────────
+        SecurityRule rule = SecurityConfig.findRule(incomingPath, method);
+        if (rule != null) {
+            String headerUserId = exchange.getRequestHeaders().getFirst("X-Usuario-Id");
+            if (headerUserId == null || !headerUserId.matches("\\d+")) {
+                sendError(exchange, 401, "Se requiere el header X-Usuario-Id para esta operación");
+                return;
+            }
+            Long usuarioId = Long.parseLong(headerUserId);
+            if (!roleValidator.tieneRol(usuarioId, rule.getRequiredRole())) {
+                sendError(exchange, 403,
+                        "Acceso denegado: se requiere el rol " + rule.getRequiredRole());
+                return;
+            }
+            System.out.printf("[Gateway][Security] Usuario %d autorizado (%s) → %s %s%n",
+                    usuarioId, rule.getRequiredRole(), method, incomingPath);
+        }
+        // ─────────────────────────────────────────────────────────────────────
 
         // /api/usuarios/login → /usuarios/login
         String downstreamPath = incomingPath.replaceFirst("^/api", "");

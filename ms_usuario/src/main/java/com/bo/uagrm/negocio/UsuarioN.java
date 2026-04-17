@@ -63,10 +63,11 @@ public class UsuarioN {
         return dao.actualizarUsuario(nuevo);
     }
 
-    public boolean eliminarUsuario(Long id, Long solicitanteId) throws Exception {
-        if (solicitanteId == null) {
-            throw new IllegalArgumentException("Se requiere el header X-Usuario-Id para esta operacion");
-        }
-        return dao.eliminarUsuario(id, solicitanteId);
+    public List<String> obtenerRoles(Long id) throws Exception {
+        return dao.obtenerRolesPorUsuarioId(id);
+    }
+
+    public boolean eliminarUsuario(Long id) throws Exception {
+        return dao.eliminarUsuario(id);
     }
 }

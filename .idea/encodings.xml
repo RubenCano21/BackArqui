@@ -3,6 +3,8 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/api_gateway/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/api_gateway/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/ms_commons/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/ms_commons/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ms_libros/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ms_libros/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ms_usuario/src/main/java" charset="UTF-8" />

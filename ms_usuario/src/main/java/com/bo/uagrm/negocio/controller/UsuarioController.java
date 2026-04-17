@@ -2,7 +2,7 @@ package com.bo.uagrm.negocio.controller;
 
 import com.bo.uagrm.datos.entity.Usuario;
 import com.bo.uagrm.negocio.AuthException;
-import com.bo.uagrm.negocio.JsonConfig;
+import com.bo.uagrm.commons.JsonConfig;
 import com.bo.uagrm.negocio.UsuarioN;
 import com.bo.uagrm.negocio.dto.LoginRequest;
 import com.bo.uagrm.negocio.dto.LoginResponse;
@@ -25,7 +25,8 @@ public class UsuarioController implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         String method = exchange.getRequestMethod();
         String path   = exchange.getRequestURI().getPath();
-        boolean isLoginPath = path.matches("^/usuarios/login/?$");
+        boolean isLoginPath   = path.matches("^/usuarios/login/?$");
+        boolean isRolesPath   = path.matches("^/usuarios/\\d+/roles/?$");
 
         // Extraer segmento de ID si existe: /usuarios/42 → "42"
         String[] parts = path.replaceAll("/$", "").split("/");
@@ -33,7 +34,22 @@ public class UsuarioController implements HttpHandler {
         boolean hasId = lastSegment.matches("\\d+");
         Long id = hasId ? Long.parseLong(lastSegment) : null;
 
+        // Para /usuarios/{id}/roles el id está en la posición 2
+        if (isRolesPath && parts.length >= 3) {
+            id = Long.parseLong(parts[2]);
+        }
+
         try {
+            // GET /usuarios/{id}/roles — endpoint interno para el API Gateway
+            if (isRolesPath) {
+                if (!"GET".equalsIgnoreCase(method)) {
+                    sendResponse(exchange, 405, "{\"error\":\"Metodo no permitido\"}");
+                    return;
+                }
+                handleGetRoles(exchange, id);
+                return;
+            }
+
             if (isLoginPath && !"POST".equals(method)) {
                 sendResponse(exchange, 405, "{\"error\":\"Metodo no permitido\"}");
                 return;
@@ -66,6 +82,16 @@ public class UsuarioController implements HttpHandler {
     }
 
 
+
+    // GET /usuarios/{id}/roles — endpoint interno para el API Gateway
+    private void handleGetRoles(HttpExchange exchange, Long id) throws Exception {
+        if (id == null) {
+            sendResponse(exchange, 400, jsonError("Se requiere el ID del usuario"));
+            return;
+        }
+        List<String> roles = usuarioN.obtenerRoles(id);
+        sendResponse(exchange, 200, mapper.writeValueAsString(roles));
+    }
 
     // GET
     private void handleUsuarioGet(HttpExchange exchange, Long id) throws Exception {
@@ -104,7 +130,7 @@ public class UsuarioController implements HttpHandler {
         sendResponse(exchange, 200, mapper.writeValueAsString(actualizado));
     }
 
-    // DELETE
+    // DELETE — la autorización ADMIN ya fue validada por el API Gateway
     private void handleUsuarioDelete(HttpExchange exchange, Long id) {
         if (id == null) {
             try {
@@ -114,20 +140,9 @@ public class UsuarioController implements HttpHandler {
             }
             return;
         }
-        String headerSolicitante = exchange.getRequestHeaders().getFirst("X-Usuario-Id");
-        Long solicitanteId = null;
-        if (headerSolicitante != null && headerSolicitante.matches("\\d+")) {
-            solicitanteId = Long.parseLong(headerSolicitante);
-        }
         try {
-            boolean eliminado = usuarioN.eliminarUsuario(id, solicitanteId);
+            boolean eliminado = usuarioN.eliminarUsuario(id);
             sendResponse(exchange, 200, mapper.writeValueAsString(eliminado));
-        } catch (SecurityException e) {
-            try {
-                sendResponse(exchange, 403, jsonError(e.getMessage()));
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
         } catch (Exception e) {
             try {
                 sendResponse(exchange, 500, jsonError("Error interno: " + e.getMessage()));
