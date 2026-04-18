@@ -25,6 +25,8 @@ public class LibroDao {
         libro.setCategoriaId(rs.wasNull() ? null : catId);
         int editId = rs.getInt("editorial_id");
         libro.setEditorialId(rs.wasNull() ? null : editId);
+        int autId = rs.getInt("autor_id");
+        libro.setAutorId(rs.wasNull() ? null : autId);
         return libro;
     }
 
@@ -101,8 +103,8 @@ public class LibroDao {
 
     // ── Registrar Libro ───────────────────────────────────────────────────────
     public boolean registrarLibro(Libro nuevo) throws Exception {
-        String sql = "INSERT INTO libros(codigo, titulo, anio, edicion, nro_ejemplar, categoria_id, editorial_id) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO libros(codigo, titulo, anio, edicion, nro_ejemplar, categoria_id, editorial_id, autor_id) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, nuevo.getCodigo());
@@ -114,26 +116,42 @@ public class LibroDao {
             else ps.setNull(6, java.sql.Types.INTEGER);
             if (nuevo.getEditorialId() != null) ps.setInt(7, nuevo.getEditorialId());
             else ps.setNull(7, java.sql.Types.INTEGER);
+            if (nuevo.getAutorId() != null) ps.setInt(8, nuevo.getAutorId());
+            else ps.setNull(8, java.sql.Types.INTEGER);
             return ps.executeUpdate() > 0;
         }
     }
 
     // ── Actualizar Libro ──────────────────────────────────────────────────────
     public boolean actualizarLibro(Libro libro) throws Exception {
-        String sql = "UPDATE libros SET codigo = ?, titulo = ?, anio = ?, edicion = ?, " +
-                     "nro_ejemplar = ?, categoria_id = ?, editorial_id = ? WHERE id = ?";
+        String sql = "UPDATE libros SET titulo = ?, anio = ?, edicion = ?, " +
+                     "nro_ejemplar = ?, categoria_id = ?, editorial_id = ?, autor_id = ? WHERE id = ?";
         try (Connection conn = ConnectionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, libro.getCodigo());
-            ps.setString(2, libro.getTitulo());
-            ps.setInt(3, libro.getAnio());
-            ps.setString(4, libro.getEdicion());
-            ps.setInt(5, libro.getNroEjemplar());
-            if (libro.getCategoriaId() != null) ps.setInt(6, libro.getCategoriaId());
+            ps.setString(1, libro.getTitulo());
+            ps.setInt(2, libro.getAnio());
+            ps.setString(3, libro.getEdicion());
+            ps.setInt(4, libro.getNroEjemplar());
+            if (libro.getCategoriaId() != null) ps.setInt(5, libro.getCategoriaId());
+            else ps.setNull(5, java.sql.Types.INTEGER);
+            if (libro.getEditorialId() != null) ps.setInt(6, libro.getEditorialId());
             else ps.setNull(6, java.sql.Types.INTEGER);
-            if (libro.getEditorialId() != null) ps.setInt(7, libro.getEditorialId());
+            if (libro.getAutorId() != null) ps.setInt(7, libro.getAutorId());
             else ps.setNull(7, java.sql.Types.INTEGER);
             ps.setInt(8, libro.getId());
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    // ── Actualizar cantidad de ejemplares disponibles (delta: +1 devolucion, -1 prestamo) ──
+    public boolean actualizarEjemplares(int id, int delta) throws Exception {
+        String sql = "UPDATE libros SET nro_ejemplar = nro_ejemplar + ? " +
+                     "WHERE id = ? AND nro_ejemplar + ? >= 0";
+        try (Connection conn = ConnectionDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, delta);
+            ps.setInt(2, id);
+            ps.setInt(3, delta);
             return ps.executeUpdate() > 0;
         }
     }

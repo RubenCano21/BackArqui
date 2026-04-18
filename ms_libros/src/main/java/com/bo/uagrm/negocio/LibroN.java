@@ -28,4 +28,8 @@ public class LibroN {
     public boolean eliminarLibro(int id) throws Exception{
         return libroDao.eliminarLibro(id);
     }
+
+    public boolean actualizarEjemplares(int id, int delta) throws Exception {
+        return libroDao.actualizarEjemplares(id, delta);
+    }
 }

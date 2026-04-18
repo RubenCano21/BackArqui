@@ -100,7 +100,11 @@ public class UsuarioController implements HttpHandler {
             sendResponse(exchange, 200, mapper.writeValueAsString(lista));
         } else {
             Usuario usuario = usuarioN.buscarPorId(id);
-            sendResponse(exchange, 200, mapper.writeValueAsString(usuario));
+            if (usuario == null) {
+                sendResponse(exchange, 404, jsonError("Usuario con ID " + id + " no encontrado"));
+            } else {
+                sendResponse(exchange, 200, mapper.writeValueAsString(usuario));
+            }
         }
     }
 

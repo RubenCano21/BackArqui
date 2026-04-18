@@ -72,6 +72,7 @@ public class ProxyHandler implements HttpHandler {
         }
 
         // ── Validación centralizada de roles ─────────────────────────────────
+        String rolReal = null;   // rol real del usuario; se enviará como X-Rol al microservicio
         SecurityRule rule = SecurityConfig.findRule(incomingPath, method);
         if (rule != null) {
             String headerUserId = exchange.getRequestHeaders().getFirst("X-Usuario-Id");
@@ -85,8 +86,10 @@ public class ProxyHandler implements HttpHandler {
                         "Acceso denegado: se requiere el rol " + rule.getRequiredRole());
                 return;
             }
-            System.out.printf("[Gateway][Security] Usuario %d autorizado (%s) → %s %s%n",
-                    usuarioId, rule.getRequiredRole(), method, incomingPath);
+            // Obtener el rol real del usuario para enviarlo al microservicio
+            rolReal = roleValidator.getRolReal(usuarioId);
+            System.out.printf("[Gateway][Security] Usuario %d (%s) autorizado → %s %s%n",
+                    usuarioId, rolReal, method, incomingPath);
         }
         // ─────────────────────────────────────────────────────────────────────
 
@@ -112,6 +115,11 @@ public class ProxyHandler implements HttpHandler {
                     try { reqBuilder.header(entry.getKey(), val); }
                     catch (IllegalArgumentException ignored) {}
                 }
+            }
+
+            // Agregar rol real para que el microservicio pueda aplicar lógica de acceso
+            if (rolReal != null) {
+                reqBuilder.header("X-Rol", rolReal);
             }
 
             // Asignar método y body

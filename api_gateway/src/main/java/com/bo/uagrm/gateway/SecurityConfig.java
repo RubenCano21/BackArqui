@@ -29,7 +29,22 @@ public class SecurityConfig {
         // Solo ADMIN puede crear, actualizar o eliminar libros
         new SecurityRule("/api/libros",        "POST",   "ADMIN"),
         new SecurityRule("/api/libros/\\d+",   "PUT",    "ADMIN"),
-        new SecurityRule("/api/libros/\\d+",   "DELETE", "ADMIN")
+        new SecurityRule("/api/libros/\\d+",   "DELETE", "ADMIN"),
+
+        // ── Préstamos ─────────────────────────────────────────────────────────
+        // Ver préstamos → ADMIN ve todos, ESTUDIANTE solo los suyos
+        new SecurityRule("/api/prestamos",                          "GET",    "ESTUDIANTE"),
+        new SecurityRule("/api/prestamos/\\d+",                     "GET",    "ESTUDIANTE"),
+        new SecurityRule("/api/prestamos/estudiante/\\d+",          "GET",    "ESTUDIANTE"),
+        // Crear préstamo → ESTUDIANTE o ADMIN
+        new SecurityRule("/api/prestamos",                          "POST",   "ESTUDIANTE"),
+        // Devolver préstamo → ESTUDIANTE o ADMIN
+        new SecurityRule("/api/prestamos/\\d+/devolver",            "PUT",    "ESTUDIANTE"),
+        // Agregar/quitar libro de un préstamo → ESTUDIANTE o ADMIN
+        new SecurityRule("/api/prestamos/\\d+/items",               "POST",   "ESTUDIANTE"),
+        new SecurityRule("/api/prestamos/\\d+/items/\\d+",          "DELETE", "ESTUDIANTE"),
+        // Cancelar préstamo → solo ADMIN
+        new SecurityRule("/api/prestamos/\\d+",                     "DELETE", "ADMIN")
 
         // ── Agregar más reglas aquí según crezca el sistema ───────────────
     );

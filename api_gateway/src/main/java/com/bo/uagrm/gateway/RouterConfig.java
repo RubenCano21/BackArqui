@@ -33,6 +33,22 @@ public class RouterConfig {
                 env("ROUTE_LIBROS_PATH",  props.getProperty("route.libros.path",  "/api/libros")),
                 env("ROUTE_LIBROS_TARGET", props.getProperty("route.libros.target", "http://localhost:8082"))
         );
+        ROUTES.put(
+                env("ROUTE_AUTORES_PATH",  props.getProperty("route.autores.path",  "/api/autores")),
+                env("ROUTE_AUTORES_TARGET", props.getProperty("route.autores.target", "http://localhost:8082"))
+        );
+        ROUTES.put(
+                env("ROUTE_CATEGORIAS_PATH",  props.getProperty("route.categorias.path",  "/api/categorias")),
+                env("ROUTE_CATEGORIAS_TARGET", props.getProperty("route.categorias.target", "http://localhost:8082"))
+        );
+        ROUTES.put(
+                env("ROUTE_EDITORIALES_PATH",  props.getProperty("route.editoriales.path",  "/api/editoriales")),
+                env("ROUTE_EDITORIALES_TARGET", props.getProperty("route.editoriales.target", "http://localhost:8082"))
+        );
+        ROUTES.put(
+                env("ROUTE_PRESTAMOS_PATH",  props.getProperty("route.prestamos.path",  "/api/prestamos")),
+                env("ROUTE_PRESTAMOS_TARGET", props.getProperty("route.prestamos.target", "http://localhost:8083"))
+        );
     }
 
     public static Map<String, String> getRoutes() {

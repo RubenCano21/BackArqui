@@ -36,6 +36,7 @@ public class LibroController implements HttpHandler {
                     case "POST"   -> handleResgistrarLibro(exchange);
                     case "PUT"    -> handleUpdateLibro(exchange, id);
                     case "DELETE" -> handleDeleteLibro(exchange, id);
+                    case "PATCH"  -> handlePatchEjemplares(exchange, path);
                     default       -> sendResponse(exchange, 405, "{\"error\":\"Metodo no permitido\"}");
                 }
         } catch (Exception e) {
@@ -52,7 +53,11 @@ public class LibroController implements HttpHandler {
             sendResponse(exchange, 200, mapper.writeValueAsString(lista));
         } else {
             Libro libro = libroN.buscarLibroPorId(id);
-            sendResponse(exchange, 200, mapper.writeValueAsString(libro));
+            if (libro == null) {
+                sendResponse(exchange, 404, jsonError("Libro con ID " + id + " no encontrado"));
+            } else {
+                sendResponse(exchange, 200, mapper.writeValueAsString(libro));
+            }
         }
     }
 
@@ -97,6 +102,29 @@ public class LibroController implements HttpHandler {
         }
     }
 
+
+    // PATCH /libros/{id}/ejemplares — incrementa o decrementa nro_ejemplar
+    private void handlePatchEjemplares(HttpExchange exchange, String path) throws Exception {
+        String[] parts = path.replaceAll("/$", "").split("/");
+        if (parts.length < 2 || !"ejemplares".equals(parts[parts.length - 1])) {
+            sendResponse(exchange, 400, jsonError("Ruta invalida para PATCH"));
+            return;
+        }
+        String idStr = parts[parts.length - 2];
+        if (!idStr.matches("\\d+")) {
+            sendResponse(exchange, 400, jsonError("ID de libro invalido"));
+            return;
+        }
+        int libroId = Integer.parseInt(idStr);
+        com.fasterxml.jackson.databind.JsonNode body = mapper.readTree(exchange.getRequestBody());
+        int delta = body.path("delta").asInt(0);
+        boolean ok = libroN.actualizarEjemplares(libroId, delta);
+        if (!ok) {
+            sendResponse(exchange, 409, jsonError("No se puede actualizar: el resultado seria negativo o el libro no existe"));
+            return;
+        }
+        sendResponse(exchange, 200, "{\"ok\":true}");
+    }
 
     // Utils
     private void sendResponse(HttpExchange exchange, int status, String body) throws IOException {

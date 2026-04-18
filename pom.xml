@@ -13,6 +13,7 @@
         <module>ms_usuario</module>
         <module>ms_libros</module>
         <module>api_gateway</module>
+        <module>ms_prestamos</module>
     </modules>
 
     <properties>

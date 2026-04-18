@@ -2,6 +2,7 @@ package com.bo.uagrm.commons;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import lombok.Getter;
 
 /**
@@ -15,6 +16,7 @@ public class JsonConfig {
 
     static {
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 }
 

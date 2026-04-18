@@ -13,6 +13,7 @@ public class Libro {
     private int anio;
     private String edicion;
     private int nroEjemplar;      // columna en libros
+    private Integer autorId;      // FK → autores(id) via libro_autor
     private Integer categoriaId;  // FK → categorias(id)
     private Integer editorialId;  // FK → editoriales(id)
 
