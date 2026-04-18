@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -92,21 +93,49 @@ public class UsuarioDao {
         return roles;
     }
 
-    // Registrar Usuario
+// Registrar Usuario y asignar rol ESTUDIANTE por defecto
     public boolean registrarUsuario(Usuario nuevo) throws Exception {
-        String sql = "INSERT INTO usuarios(ci, nombre, apellido, email, telefono, fecha_nac, genero, estado) " +
+        String sqlUsuario = "INSERT INTO usuarios(ci, nombre, apellido, email, telefono, fecha_nac, genero, estado) " +
                         "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        try ( Connection conn = ConnectionDB.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql)){
-            ps.setInt(1, nuevo.getCi());
-            ps.setString(2, nuevo.getNombre());
-            ps.setString(3, nuevo.getApellido());
-            ps.setString(4, nuevo.getEmail());
-            ps.setInt(5, nuevo.getTelefono());
-            ps.setDate(6, new java.sql.Date(nuevo.getFechaNac().getTime()));
-            ps.setString(7, nuevo.getGenero());
-            ps.setString(8, nuevo.getEstado());
-            return ps.executeUpdate() > 0;
+        String sqlRolId   = "SELECT id FROM roles WHERE UPPER(nombre) = 'ESTUDIANTE' LIMIT 1";
+        String sqlRol     = "INSERT INTO usuario_rol(usuario_id, rol_id) VALUES (?, ?)";
+
+        try (Connection conn = ConnectionDB.getConnection()) {
+            // 1. Insertar usuario y recuperar el ID generado
+            long nuevoId;
+            try (PreparedStatement ps = conn.prepareStatement(sqlUsuario, Statement.RETURN_GENERATED_KEYS)) {
+                ps.setInt(1, nuevo.getCi());
+                ps.setString(2, nuevo.getNombre());
+                ps.setString(3, nuevo.getApellido());
+                ps.setString(4, nuevo.getEmail());
+                ps.setInt(5, nuevo.getTelefono());
+                ps.setDate(6, new java.sql.Date(nuevo.getFechaNac().getTime()));
+                ps.setString(7, nuevo.getGenero());
+                ps.setString(8, nuevo.getEstado());
+                int rows = ps.executeUpdate();
+                if (rows == 0) return false;
+                try (ResultSet keys = ps.getGeneratedKeys()) {
+                    if (!keys.next()) return false;
+                    nuevoId = keys.getLong(1);
+                }
+            }
+
+            // 2. Obtener el ID del rol ESTUDIANTE
+            long rolId;
+            try (PreparedStatement ps = conn.prepareStatement(sqlRolId);
+                 ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) return true; // rol no existe en BD, igual el usuario fue creado
+                rolId = rs.getLong(1);
+            }
+
+            // 3. Asignar rol ESTUDIANTE al nuevo usuario
+            try (PreparedStatement ps = conn.prepareStatement(sqlRol)) {
+                ps.setLong(1, nuevoId);
+                ps.setLong(2, rolId);
+                ps.executeUpdate();
+            }
+
+            return true;
         }
     }
 
