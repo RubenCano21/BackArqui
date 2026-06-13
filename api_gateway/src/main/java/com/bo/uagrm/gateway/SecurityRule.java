@@ -2,10 +2,8 @@ package com.bo.uagrm.gateway;
 
 /**
  * Regla de seguridad del API Gateway.
- *
  * Define qué combinación de path (regex) + método HTTP requiere
  * que el usuario tenga un rol específico.
- *
  * Ejemplo:
  *   new SecurityRule("/api/usuarios/\\d+", "DELETE", "ADMIN")
  *   → Solo usuarios con rol ADMIN pueden hacer DELETE en /api/usuarios/{id}

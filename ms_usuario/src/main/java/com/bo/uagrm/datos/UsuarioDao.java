@@ -183,5 +183,13 @@ public class UsuarioDao {
         }
     }
 
+    /**
+     * viernes 12 revision del 1er parcial
+     * para el 2do parcial puede ser al proyecto
+     * o un caso de estudio(problema no necesariamente del proyecto)
+     * lunes 15 el 2do parcial presentacion del documento hasta las 7
+     * miercoles 17 exposiciones
+     * viernes 19  revision del 2do parcial
+     * */
 
 }

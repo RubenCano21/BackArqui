@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="usuarios_db@localhost" uuid="2e13a077-a119-4ff9-a6b5-da55a7f6abda">
+    <data-source source="LOCAL" name="ms_usuarios_db@localhost" uuid="a646b11a-18a4-4a99-a24d-6b90a8841ea7">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/usuarios_db</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:5432/ms_usuarios_db</jdbc-url>
       <jdbc-additional-properties>
         <property name="com.intellij.clouds.kubernetes.db.host.port" />
         <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
@@ -13,11 +13,11 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="libros_db@localhost" uuid="3f79674c-911a-4735-b571-0992253c0974">
+    <data-source source="LOCAL" name="ms_libros_db@localhost" uuid="aef5d25b-d239-4e1d-bf44-e7478401bf0f">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/libros_db</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:5432/ms_libros_db</jdbc-url>
       <jdbc-additional-properties>
         <property name="com.intellij.clouds.kubernetes.db.host.port" />
         <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
@@ -25,11 +25,23 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="prestamos_db@localhost" uuid="00c75637-fc42-4d24-a7c8-370abe237bdb">
+    <data-source source="LOCAL" name="ms_prestamos_db@localhost" uuid="f33c89af-1401-4140-b4ff-b2d80f391a90">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/prestamos_db</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:5432/ms_prestamos_db</jdbc-url>
+      <jdbc-additional-properties>
+        <property name="com.intellij.clouds.kubernetes.db.host.port" />
+        <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
+        <property name="com.intellij.clouds.kubernetes.db.container.port" />
+      </jdbc-additional-properties>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="ms_notificaciones@localhost" uuid="fd2f960d-fd22-4c0a-b1cc-65325fa42dbb">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://localhost:5432/ms_notificaciones</jdbc-url>
       <jdbc-additional-properties>
         <property name="com.intellij.clouds.kubernetes.db.host.port" />
         <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />

@@ -1,9 +1,6 @@
 package com.bo.uagrm.negocio;
 
-import com.bo.uagrm.negocio.controller.AutorController;
-import com.bo.uagrm.negocio.controller.CategoriaController;
-import com.bo.uagrm.negocio.controller.EditorialController;
-import com.bo.uagrm.negocio.controller.LibroController;
+import com.bo.uagrm.negocio.controller.*;
 import com.sun.net.httpserver.HttpServer;
 
 import java.net.InetSocketAddress;
@@ -23,6 +20,9 @@ public class LibroServer {
         server.createContext("/editoriales",      new EditorialController());
         server.createContext("/editoriales/",     new EditorialController());
 
+        server.createContext("/lista-espera", new ListaEsperaController());
+        server.createContext("/lista-espera/", new ListaEsperaController());
+
         server.setExecutor(null);
         server.start();
 
@@ -33,6 +33,7 @@ public class LibroServer {
         System.out.println("║  /autores       [GET, POST, PUT, DELETE] ║");
         System.out.println("║  /categorias    [GET, POST, PUT, DELETE] ║");
         System.out.println("║  /editoriales   [GET, POST, PUT, DELETE] ║");
+        System.out.println("║  /lista-espera  [GET, POST, PUT, DELETE] ║");
         System.out.println("╚══════════════════════════════════════════╝");
     }
 }

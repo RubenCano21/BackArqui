@@ -8,7 +8,6 @@ import java.util.Properties;
 /**
  * Tabla de rutas del API Gateway.
  * Cada entrada mapea un prefijo de path del gateway a la URL base del microservicio destino.
- *
  * Configuración en application.properties:
  *   route.<nombre>.path   = prefijo del gateway  (ej: /api/usuarios)
  *   route.<nombre>.target = URL base del ms       (ej: <a href="http://localhost:8081">...</a>)

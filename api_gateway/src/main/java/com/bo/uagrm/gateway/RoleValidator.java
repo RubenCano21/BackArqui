@@ -8,11 +8,9 @@ import java.time.Duration;
 
 /**
  * Validador de roles centralizado del API Gateway.
- *
  * Consulta al ms_usuario el endpoint GET /usuarios/{id}/roles
  * para verificar si un usuario posee un rol determinado.
  * De esta forma, NINGÚN microservicio necesita reimplementar esta lógica.
- *
  * Flujo:
  *   Cliente → Gateway (verifica rol aquí) → Microservicio destino
  */
@@ -22,7 +20,7 @@ public class RoleValidator {
             .connectTimeout(Duration.ofSeconds(5))
             .build();
 
-    /** URL base del ms_usuario, ej: http://localhost:8081 */
+    /** URL base del ms_usuario, ej: <a href="http://localhost:8081">...</a> */
     private final String usuariosBaseUrl;
 
     public RoleValidator(String usuariosBaseUrl) {

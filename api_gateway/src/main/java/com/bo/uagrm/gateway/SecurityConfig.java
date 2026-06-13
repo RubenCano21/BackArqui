@@ -4,13 +4,10 @@ import java.util.List;
 
 /**
  * Configuración central de seguridad del API Gateway.
- *
  * Aquí se declaran TODAS las rutas que requieren un rol específico.
  * Para proteger una nueva ruta en cualquier microservicio,
  * solo se agrega una entrada aquí — sin tocar el microservicio.
- *
  * Formato: new SecurityRule(pathRegex, método HTTP, rolRequerido)
- *
  * Ejemplos de rutas    Regex                                  Método  Rol
  * ──────────────────   ─────────────────────────────────────  ──────  ─────
  * /api/usuarios/{id}   /api/usuarios/\\d+                     DELETE  ADMIN

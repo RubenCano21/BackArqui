@@ -14,6 +14,7 @@
         <module>ms_libros</module>
         <module>api_gateway</module>
         <module>ms_prestamos</module>
+        <module>ms_notificaciones</module>
     </modules>
 
     <properties>

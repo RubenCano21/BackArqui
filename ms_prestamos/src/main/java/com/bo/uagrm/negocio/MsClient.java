@@ -21,7 +21,6 @@ public class MsClient {
     private static final String MS_USUARIO_URL;
     private static final String MS_LIBROS_URL;
 
-    // HttpClient de Java 11+ soporta PATCH, a diferencia de HttpURLConnection
     private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(5))
             .build();
