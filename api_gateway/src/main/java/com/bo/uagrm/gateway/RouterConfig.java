@@ -48,6 +48,10 @@ public class RouterConfig {
                 env("ROUTE_PRESTAMOS_PATH",  props.getProperty("route.prestamos.path",  "/api/prestamos")),
                 env("ROUTE_PRESTAMOS_TARGET", props.getProperty("route.prestamos.target", "http://localhost:8083"))
         );
+        ROUTES.put(
+                env("ROUTE_NOTIFICACIONES_PATH",   props.getProperty("route.notificaciones.path",  "/api/notificaciones")),
+                env("ROUTE_NOTIFICACIONES_TARGET", props.getProperty("route.notificaciones.target", "http://localhost:8084"))
+        );
     }
 
     public static Map<String, String> getRoutes() {

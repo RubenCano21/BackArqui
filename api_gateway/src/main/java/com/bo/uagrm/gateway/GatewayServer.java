@@ -20,6 +20,11 @@ public class GatewayServer {
 
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 
+        // Handler especializado para SSE — no usa ProxyHandler normal
+        String notifTarget = RouterConfig.getRoutes()
+                .getOrDefault("/api/notificaciones", "http://localhost:8084");
+        server.createContext("/api/notificaciones/stream", new SseProxyHandler(notifTarget));
+
         // Registrar cada ruta: prefijo del gateway → microservicio destino
         Map<String, String> routes = RouterConfig.getRoutes();
         for (Map.Entry<String, String> entry : routes.entrySet()) {
@@ -39,6 +44,8 @@ public class GatewayServer {
         System.out.println("╠══════════════════════════════════════════════╣");
         routes.forEach((path, target) ->
                 System.out.printf("║  %-18s  →  %-20s ║%n", path, target));
+        System.out.printf(  "║  %-18s  →  %-20s ║%n",
+                "/api/notificaciones/stream", "SseProxyHandler");
         System.out.println("╚══════════════════════════════════════════════╝");
     }
 

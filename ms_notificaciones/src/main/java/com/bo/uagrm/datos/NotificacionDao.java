@@ -139,4 +139,21 @@ public class NotificacionDao {
         }
         return lista;
     }
+
+    public List<Notificacion> listarPendientesPorUsuario(int usuarioId) throws Exception {
+        List<Notificacion> lista = new ArrayList<>();
+        String sql = """
+        SELECT * FROM notificaciones
+        WHERE usuario_id = ? AND estado = 'PENDIENTE'
+        ORDER BY fecha_creada ASC
+        """;
+        try (Connection conn = ConnectionDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, usuarioId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) lista.add(map(rs));
+            }
+        }
+        return lista;
+    }
 }

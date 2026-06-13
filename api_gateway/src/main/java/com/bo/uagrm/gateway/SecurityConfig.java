@@ -41,9 +41,20 @@ public class SecurityConfig {
         new SecurityRule("/api/prestamos/\\d+/items",               "POST",   "ESTUDIANTE"),
         new SecurityRule("/api/prestamos/\\d+/items/\\d+",          "DELETE", "ESTUDIANTE"),
         // Cancelar préstamo → solo ADMIN
-        new SecurityRule("/api/prestamos/\\d+",                     "DELETE", "ADMIN")
+        new SecurityRule("/api/prestamos/\\d+",                     "DELETE", "ADMIN"),
 
         // ── Agregar más reglas aquí según crezca el sistema ───────────────
+            // ── Notificaciones ────────────────────────────────────────────────────
+        // Stream SSE → cualquier usuario autenticado (solo el suyo propio)
+        new SecurityRule("/api/notificaciones/stream/\\d+",      "GET",  "ESTUDIANTE"),
+        // Historial propio → cualquier usuario autenticado
+        new SecurityRule("/api/notificaciones/usuario/\\d+",     "GET",  "ESTUDIANTE"),
+        // Reintentar pendientes → solo ADMIN
+        new SecurityRule("/api/notificaciones/reintentar",        "POST", "ADMIN"),
+        // Listar todas → solo ADMIN
+        new SecurityRule("/api/notificaciones",                   "GET",  "ADMIN"),
+        // Registrar notificación → solo ADMIN (los ms la llaman internamente)
+        new SecurityRule("/api/notificaciones",                   "POST", "ADMIN")
     );
 
     /**

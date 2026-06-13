@@ -3,6 +3,7 @@ package com.bo.uagrm.negocio.controller;
 import com.bo.uagrm.commons.JsonConfig;
 import com.bo.uagrm.datos.entity.Notificacion;
 import com.bo.uagrm.negocio.NotificacionN;
+import com.bo.uagrm.negocio.SseManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -13,7 +14,6 @@ import java.util.List;
 
 /**
  * Endpoints:
- *
  *  POST  /notificaciones                  → registrar y enviar
  *  GET   /notificaciones                  → listar todas
  *  GET   /notificaciones/{id}             → buscar por id
@@ -78,19 +78,29 @@ public class NotificacionController implements HttpHandler {
 
             // /notificaciones/{id}  — debe ser numérico
             int id = parseId(tercero);
-            switch (method) {
-                case "GET" -> handleBuscarPorId(ex, id);
-                default    -> methodNotAllowed(ex, "GET");
+            if (method.equals("GET")) {
+                handleBuscarPorId(ex, id);
+            } else {
+                methodNotAllowed(ex, "GET");
             }
+            return;
+        }
+
+        // /notificaciones/stream/{uid}  → conexión SSE
+        if (depth == 4 && "stream".equals(seg[2])) {
+            int uid = parseId(seg[3]);
+            if ("GET".equals(method)) handleStream(ex, uid);
+            else methodNotAllowed(ex, "GET");
             return;
         }
 
         // /notificaciones/usuario/{uid}  (depth == 4)
         if (depth == 4 && "usuario".equals(seg[2])) {
             int uid = parseId(seg[3]);
-            switch (method) {
-                case "GET" -> handleListarPorUsuario(ex, uid);
-                default    -> methodNotAllowed(ex, "GET");
+            if (method.equals("GET")) {
+                handleListarPorUsuario(ex, uid);
+            } else {
+                methodNotAllowed(ex, "GET");
             }
             return;
         }
@@ -212,5 +222,36 @@ public class NotificacionController implements HttpHandler {
 
     private String jsonError(String msg) {
         return "{\"error\":\"" + msg.replace("\"", "'") + "\"}";
+    }
+
+    private void handleStream(HttpExchange ex, int usuarioId) throws Exception {
+        // Headers SSE obligatorios
+        ex.getResponseHeaders().set("Content-Type",  "text/event-stream; charset=UTF-8");
+        ex.getResponseHeaders().set("Cache-Control", "no-cache");
+        ex.getResponseHeaders().set("Connection",    "keep-alive");
+        // Necesario para que Tailwind/nginx no buffer la respuesta
+        ex.getResponseHeaders().set("X-Accel-Buffering", "no");
+        ex.sendResponseHeaders(200, 0); // 0 = longitud desconocida, stream abierto
+
+        SseManager sse = SseManager.getInstance();
+        sse.registrar(usuarioId, ex);
+
+        // Enviar notificaciones que quedaron pendientes mientras estaba offline
+        notifN.enviarPendientesAlConectar(usuarioId);
+
+        // Mantener la conexión viva con un ping cada 20 segundos
+        // Si el browser cierra la pestaña, el write() lanzará IOException
+        // y SseManager.emitir() lo detecta y limpia la conexión
+        try {
+            while (true) {
+                Thread.sleep(20_000);
+                // Ping SSE — el browser lo ignora pero detecta la desconexión
+                byte[] ping = ": ping\n\n".getBytes(StandardCharsets.UTF_8);
+                ex.getResponseBody().write(ping);
+                ex.getResponseBody().flush();
+            }
+        } catch (IOException | InterruptedException e) {
+            sse.desregistrar(usuarioId);
+        }
     }
 }

@@ -19,11 +19,15 @@ public class NotificacionServer {
         server.createContext("/notificaciones",  new NotificacionController());
         server.createContext("/notificaciones/", new NotificacionController());
 
+        // En NotificacionServer.java — agregar estas dos líneas
+        server.createContext("/notificaciones/stream",  new NotificacionController());
+        server.createContext("/notificaciones/stream/", new NotificacionController());
+
         server.setExecutor(null);
         server.start();
 
         System.out.println("╔══════════════════════════════════════════════════════╗");
-        System.out.println("║    ms_notificaciones iniciado en puerto " + port + "         ║");
+        System.out.println("║    ms_notificaciones iniciado en puerto " + port + " ║");
         System.out.println("╠══════════════════════════════════════════════════════╣");
         System.out.println("║  POST   /notificaciones              → enviar        ║");
         System.out.println("║  GET    /notificaciones              → listar todas  ║");

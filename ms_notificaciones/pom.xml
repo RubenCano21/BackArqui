@@ -44,13 +44,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- JavaMail — para enviar correos reales via SMTP -->
-        <dependency>
-            <groupId>com.sun.mail</groupId>
-            <artifactId>jakarta.mail</artifactId>
-            <version>2.0.2</version>
-        </dependency>
-
     </dependencies>
 
 </project>
