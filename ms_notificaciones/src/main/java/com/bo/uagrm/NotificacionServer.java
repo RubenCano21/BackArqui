@@ -24,7 +24,7 @@ public class NotificacionServer {
         server.start();
 
         System.out.println("╔══════════════════════════════════════════════════════╗");
-        System.out.println("║    ms_notificaciones iniciado en puerto " + port + "       ║");
+        System.out.println("║    ms_notificaciones iniciado en puerto " + port + " ║");
         System.out.println("╠══════════════════════════════════════════════════════╣");
         System.out.println("║  POST   /notificaciones              → enviar        ║");
         System.out.println("║  GET    /notificaciones              → listar todas  ║");

@@ -1,8 +1,10 @@
 package com.bo.uagrm.negocio.controller;
 
 import com.bo.uagrm.commons.JsonConfig;
+import com.bo.uagrm.datos.entity.Multa;
 import com.bo.uagrm.datos.entity.Prestamo;
 import com.bo.uagrm.datos.entity.PrestamoItem;
+import com.bo.uagrm.negocio.DevolucionN;
 import com.bo.uagrm.negocio.PrestamoN;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
@@ -35,14 +37,15 @@ public class PrestamoController implements HttpHandler {
             // GET /prestamos/estudiante/{id}
             if (path.matches("^/prestamos/estudiante/\\d+$") && "GET".equals(method)) {
                 int estId = Integer.parseInt(path.split("/")[3]);
-                sendJson(exchange, 200, prestamoN.listarPorEstudiante(estId));
+                sendJson(exchange, 200, prestamoN.listarPorUsuario(estId));
                 return;
             }
 
             // PUT /prestamos/{id}/devolver
             if (path.matches("^/prestamos/\\d+/devolver$") && "PUT".equals(method)) {
                 int id = Integer.parseInt(path.split("/")[2]);
-                sendJson(exchange, 200, prestamoN.devolverPrestamo(id));
+                Multa multa = new DevolucionN().registrarDevolucion(id);
+                sendJson(exchange, 200, multa);
                 return;
             }
 
@@ -85,13 +88,13 @@ public class PrestamoController implements HttpHandler {
                                 sendJson(exchange, 401, jsonError("Se requiere X-Usuario-Id"));
                                 return;
                             }
-                            sendJson(exchange, 200, prestamoN.listarPorEstudiante(Integer.parseInt(xUsuarioId)));
+                            sendJson(exchange, 200, prestamoN.listarPorUsuario(Integer.parseInt(xUsuarioId)));
                         }
                     } else {
                         Prestamo p = prestamoN.buscarPorId(id);
                         if (p == null) {
                             sendJson(exchange, 404, jsonError("Préstamo no encontrado"));
-                        } else if (!esAdmin && xUsuarioId != null && p.getEstudianteId() != Integer.parseInt(xUsuarioId)) {
+                        } else if (!esAdmin && xUsuarioId != null && p.getUsuarioId() != Integer.parseInt(xUsuarioId)) {
                             // ESTUDIANTE intentando ver el préstamo de otro
                             sendJson(exchange, 403, jsonError("No tienes permiso para ver este préstamo"));
                         } else {

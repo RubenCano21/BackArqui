@@ -13,19 +13,24 @@ public class Prestamo {
 
     private int id;
     private Date fechaPrestamo;
-    private Date fechaEntrega;
+    private Date fechaEntregaPrevista;
+    private Date fechaDevolucionReal;
     private String estado;
-    private int estudianteId;
+    private int usuarioId;
     // Items del préstamo (se cargan en la capa de negocio)
     private List<PrestamoItem> items = new ArrayList<>();
 
     public Prestamo() {}
 
-    public Prestamo(int id, Date fechaPrestamo, Date fechaEntrega, String estado, int estudianteId) {
+    public Prestamo(int id, Date fechaPrestamo,
+                    Date fechaEntregaPrevista,
+                    Date fechaDevolucionReal,
+                    String estado, int usuarioId) {
         this.id = id;
         this.fechaPrestamo = fechaPrestamo;
-        this.fechaEntrega = fechaEntrega;
+        this.fechaEntregaPrevista = fechaEntregaPrevista;
+        this.fechaDevolucionReal = fechaDevolucionReal;
         this.estado = estado;
-        this.estudianteId = estudianteId;
+        this.usuarioId = usuarioId;
     }
 }

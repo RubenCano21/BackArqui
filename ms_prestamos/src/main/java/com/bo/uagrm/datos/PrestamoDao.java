@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PrestamoDao {
+    private static final boolean DEV_MODE = true;
+    private static final int DEV_DIAS_ENTREGA = 3;
 
     // ── Mapeo ─────────────────────────────────────────────────────────────────
 
@@ -15,9 +17,10 @@ public class PrestamoDao {
         Prestamo p = new Prestamo();
         p.setId(rs.getInt("id"));
         p.setFechaPrestamo(rs.getDate("fecha_prestamo"));
-        p.setFechaEntrega(rs.getDate("fecha_entrega"));
+        p.setFechaEntregaPrevista(rs.getDate("fecha_entrega_prevista"));
+        p.setFechaDevolucionReal(rs.getDate("fecha_devolucion_real"));
         p.setEstado(rs.getString("estado"));
-        p.setEstudianteId(rs.getInt("estudiante_id"));
+        p.setUsuarioId(rs.getInt("usuario_id"));
         return p;
     }
 
@@ -63,12 +66,12 @@ public class PrestamoDao {
 
     // ── Listar préstamos por estudiante ───────────────────────────────────────
 
-    public List<Prestamo> listarPorEstudiante(int estudianteId) throws Exception {
+    public List<Prestamo> listarPorUsuario(int usuarioId) throws Exception {
         List<Prestamo> lista = new ArrayList<>();
-        String sql = "SELECT * FROM prestamos WHERE estudiante_id = ? ORDER BY fecha_prestamo DESC";
+        String sql = "SELECT * FROM prestamos WHERE usuario_id = ? ORDER BY fecha_prestamo DESC";
         try (Connection conn = ConnectionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, estudianteId);
+            ps.setInt(1, usuarioId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Prestamo p = mapPrestamo(rs);
@@ -102,8 +105,8 @@ public class PrestamoDao {
 
     public int contarPrestamosActivosPorLibro(int libroId) throws Exception {
         String sql = "SELECT COUNT(*) FROM prestamo_items pi " +
-                     "INNER JOIN prestamos p ON p.id = pi.prestamo_id " +
-                     "WHERE pi.libro_id = ? AND p.estado = 'PENDIENTE'";
+                "INNER JOIN prestamos p ON p.id = pi.prestamo_id " +
+                "WHERE pi.libro_id = ? AND p.estado = 'PENDIENTE'";
         try (Connection conn = ConnectionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, libroId);
@@ -115,11 +118,11 @@ public class PrestamoDao {
 
     // ── Verificar si un estudiante tiene un préstamo PENDIENTE ───────────────
 
-    public boolean tienePrestamoPendiente(int estudianteId) throws Exception {
-        String sql = "SELECT 1 FROM prestamos WHERE estudiante_id = ? AND estado = 'PENDIENTE' LIMIT 1";
+    public boolean tienePrestamoPendiente(int usuarioId) throws Exception {
+        String sql = "SELECT 1 FROM prestamos WHERE usuario_id = ? AND estado = 'PENDIENTE' LIMIT 1";
         try (Connection conn = ConnectionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, estudianteId);
+            ps.setInt(1, usuarioId);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
             }
@@ -133,8 +136,13 @@ public class PrestamoDao {
             throw new IllegalArgumentException("El préstamo debe tener al menos un libro");
         }
 
-        String sqlPrestamo = "INSERT INTO prestamos(fecha_prestamo, estado, estudiante_id) " +
-                             "VALUES (CURRENT_DATE, 'PENDIENTE', ?) RETURNING id, fecha_prestamo, estado";
+        // DEV_MODE: fecha_entrega_prevista = hoy + DEV_DIAS_ENTREGA para facilitar pruebas de multas
+        String sqlPrestamo = DEV_MODE
+                ? "INSERT INTO prestamos(fecha_prestamo, fecha_entrega_prevista, estado, usuario_id) " +
+                  "VALUES (CURRENT_DATE, CURRENT_DATE + " + DEV_DIAS_ENTREGA + ", 'PENDIENTE', ?) " +
+                  "RETURNING id, fecha_prestamo, fecha_entrega_prevista, estado"
+                : "INSERT INTO prestamos(fecha_prestamo, estado, usuario_id) " +
+                  "VALUES (CURRENT_DATE, 'PENDIENTE', ?) RETURNING id, fecha_prestamo, estado";
         String sqlItem     = "INSERT INTO prestamo_items(prestamo_id, libro_id) VALUES (?, ?)";
 
         Connection conn = ConnectionDB.getConnection();
@@ -143,13 +151,14 @@ public class PrestamoDao {
             // 1. Insertar cabecera
             int prestamoId;
             try (PreparedStatement ps = conn.prepareStatement(sqlPrestamo)) {
-                ps.setInt(1, nuevo.getEstudianteId());
+                ps.setInt(1, nuevo.getUsuarioId());
                 try (ResultSet rs = ps.executeQuery()) {
                     rs.next();
                     prestamoId       = rs.getInt("id");
                     nuevo.setId(prestamoId);
                     nuevo.setFechaPrestamo(rs.getDate("fecha_prestamo"));
                     nuevo.setEstado(rs.getString("estado"));
+                    if (DEV_MODE) nuevo.setFechaEntregaPrevista(rs.getDate("fecha_entrega_prevista"));
                 }
             }
 
@@ -170,7 +179,7 @@ public class PrestamoDao {
             return nuevo;
 
         } catch (Exception e) {
-            conn.rollback();  // si algo falla → se revierte todo
+            conn.rollback();  // si algo falla → se revierte
             throw e;
         } finally {
             conn.setAutoCommit(true);
@@ -178,7 +187,7 @@ public class PrestamoDao {
         }
     }
 
-    // ── Devolver préstamo (cambiar estado a DEVUELTO + fecha_entrega) ─────────
+    // ── Devolver préstamo (cambiar estado a DEVUELTO + fecha_devolucion_real) ──
 
     public boolean devolverPrestamo(int id) throws Exception {
         Prestamo p = buscarPorId(id);
@@ -186,7 +195,7 @@ public class PrestamoDao {
         if ("DEVUELTO".equals(p.getEstado()))
             throw new IllegalStateException("El préstamo ya fue devuelto");
 
-        String sql = "UPDATE prestamos SET estado = 'DEVUELTO', fecha_entrega = CURRENT_DATE WHERE id = ?";
+        String sql = "UPDATE prestamos SET estado = 'DEVUELTO', fecha_devolucion_real = CURRENT_DATE WHERE id = ?";
         try (Connection conn = ConnectionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -245,4 +254,3 @@ public class PrestamoDao {
         }
     }
 }
-

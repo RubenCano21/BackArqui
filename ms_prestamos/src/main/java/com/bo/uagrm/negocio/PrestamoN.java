@@ -15,8 +15,8 @@ public class PrestamoN {
         return dao.listarPrestamos();
     }
 
-    public List<Prestamo> listarPorEstudiante(int estudianteId) throws Exception {
-        return dao.listarPorEstudiante(estudianteId);
+    public List<Prestamo> listarPorUsuario(int usuarioId) throws Exception {
+        return dao.listarPorUsuario(usuarioId);
     }
 
     public Prestamo buscarPorId(int id) throws Exception {
@@ -25,19 +25,19 @@ public class PrestamoN {
 
     public Prestamo registrarPrestamo(Prestamo nuevo) throws Exception {
         // Validaciones básicas
-        if (nuevo.getEstudianteId() <= 0)
-            throw new IllegalArgumentException("estudianteId es obligatorio");
+        if (nuevo.getUsuarioId() <= 0)
+            throw new IllegalArgumentException("usuarioId es obligatorio");
         if (nuevo.getItems() == null || nuevo.getItems().isEmpty())
             throw new IllegalArgumentException("El préstamo debe llevar al menos un libro");
 
         // Validar que el estudiante existe en ms_usuario
-        MsClient.validarUsuarioExiste(nuevo.getEstudianteId());
+        MsClient.validarUsuarioExiste(nuevo.getUsuarioId());
 
         // Validar que el estudiante no tenga un préstamo PENDIENTE activo
-        if (dao.tienePrestamoPendiente(nuevo.getEstudianteId())) {
+        if (dao.tienePrestamoPendiente(nuevo.getUsuarioId())) {
             throw new IllegalStateException(
-                "El estudiante ya tiene un préstamo pendiente. " +
-                "Debe devolver los libros antes de realizar un nuevo préstamo."
+                    "El estudiante ya tiene un préstamo pendiente. " +
+                            "Debe devolver los libros antes de realizar un nuevo préstamo."
             );
         }
 
@@ -120,11 +120,8 @@ public class PrestamoN {
         if (disponibles <= 0) {
             String titulo = MsClient.getTituloLibro(libroId);
             throw new IllegalStateException(
-                "El libro \"" + titulo + "\" no tiene ejemplares disponibles en la biblioteca"
+                    "El libro \"" + titulo + "\" no tiene ejemplares disponibles en la biblioteca"
             );
         }
     }
 }
-
-
-

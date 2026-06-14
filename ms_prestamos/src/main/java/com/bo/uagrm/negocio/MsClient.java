@@ -11,6 +11,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -20,6 +21,7 @@ public class MsClient {
 
     private static final String MS_USUARIO_URL;
     private static final String MS_LIBROS_URL;
+    private static final String MS_NOTIFICACIONES_URL;
 
     private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(5))
@@ -32,8 +34,16 @@ public class MsClient {
             if (is != null) props.load(is);
         } catch (Exception ignored) {}
 
-        MS_USUARIO_URL = getConfig("MS_USUARIO_URL", props.getProperty("MS_USUARIO_URL", "http://localhost:8081"));
-        MS_LIBROS_URL  = getConfig("MS_LIBROS_URL",  props.getProperty("MS_LIBROS_URL",  "http://localhost:8082"));
+        MS_USUARIO_URL = getConfig(
+                "MS_USUARIO_URL",
+                props.getProperty("MS_USUARIO_URL", "http://localhost:8081"));
+        MS_LIBROS_URL  = getConfig(
+                "MS_LIBROS_URL",
+                props.getProperty("MS_LIBROS_URL",  "http://localhost:8082"));
+        MS_NOTIFICACIONES_URL = getConfig(
+                "MS_NOTIFICACIONES_URL",
+                props.getProperty("MS_NOTIFICACIONES_URL", "http://localhost:8084")
+        ).replaceAll("/+$", "");
     }
 
     private static String getConfig(String envKey, String fallback) {
@@ -158,6 +168,48 @@ public class MsClient {
         } finally {
             if (conn != null) conn.disconnect();
         }
+    }
+    /**
+     * Obtiene la lista de roles de un usuario desde ms_usuario.
+     * Usado por DevolucionN para seleccionar la estrategia de multa.
+     * Endpoint: GET /usuarios/{id}/roles  → ["ESTUDIANTE"] | ["DOCENTE"] | ...
+     */
+    public static List<String> obtenerRoles(int usuarioId) throws Exception {
+        String url = MS_USUARIO_URL + "/usuarios/" + usuarioId + "/roles";
+        HttpURLConnection conn = (HttpURLConnection) URI.create(url).toURL().openConnection();
+        conn.setRequestMethod("GET");
+        conn.setConnectTimeout(3000);
+        conn.setReadTimeout(3000);
+        int status = conn.getResponseCode();
+        if (status != 200)
+            throw new IllegalStateException("ms_usuario respondió " + status + " para roles del usuario " + usuarioId);
+
+        try (java.io.InputStream is = conn.getInputStream()) {
+            // La respuesta es un array JSON: ["ESTUDIANTE"] → parseamos con Jackson
+            com.fasterxml.jackson.databind.ObjectMapper om = com.bo.uagrm.commons.JsonConfig.getMapper();
+            return om.readValue(is, new com.fasterxml.jackson.core.type.TypeReference<List<String>>() {});
+        }
+    }
+
+    /**
+     * Envía notificación de multa generada al usuario por SSE.
+     * El usuario verá un toast con el monto en su dashboard.
+     */
+    public static void notificarMulta(int usuarioId, int prestamoId,
+                                      java.math.BigDecimal monto, String tipoCalculo) throws Exception {
+        String body = String.format(
+                "{\"usuarioId\":%d,\"tipo\":\"MULTA_GENERADA\",\"canal\":\"SSE\"," +
+                        "\"mensaje\":\"Se generó una multa de %.2f Bs por devolución tardía (préstamo #%d, tarifa: %s).\","+
+                        "\"emailDestino\":\"\"}",
+                usuarioId, monto, prestamoId, tipoCalculo
+        );
+        HttpRequest req = HttpRequest.newBuilder()
+                .uri(URI.create(MS_NOTIFICACIONES_URL + "/notificaciones"))
+                .header("Content-Type", "application/json")
+                .timeout(Duration.ofSeconds(5))
+                .POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8))
+                .build();
+        HTTP_CLIENT.send(req, HttpResponse.BodyHandlers.ofString());
     }
 }
 

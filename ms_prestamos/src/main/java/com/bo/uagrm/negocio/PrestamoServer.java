@@ -1,5 +1,6 @@
 package com.bo.uagrm.negocio;
 
+import com.bo.uagrm.negocio.controller.DevolucionController;
 import com.bo.uagrm.negocio.controller.PrestamoController;
 import com.sun.net.httpserver.HttpServer;
 
@@ -12,6 +13,7 @@ public class PrestamoServer {
         HttpServer server = HttpServer.create(new InetSocketAddress(8083), 0);
 
         server.createContext("/prestamos", new PrestamoController());
+        server.createContext("/prestamos/devolver", new DevolucionController()); // ← agregar
 
         server.setExecutor(null);
         server.start();

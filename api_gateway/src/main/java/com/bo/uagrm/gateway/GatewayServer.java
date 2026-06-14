@@ -25,7 +25,7 @@ public class GatewayServer {
 
             if ("/api/notificaciones".equals(contextPath)) {
                 // Para notificaciones: enrutar /stream al SseProxyHandler,
-                // el resto al ProxyHandler normal — todo desde UN solo contexto
+                // el resto al ProxyHandler normal
                 server.createContext(contextPath,
                         new NotificacionesRouter(contextPath, targetBase, sseHandler));
             } else {
