@@ -31,12 +31,19 @@ public class ListaEsperaController implements HttpHandler {
     }
 
     // POST /lista-espera  body: { "libroId": 5, "usuarioId": 12 }
-    private void handleSuscribir(HttpExchange exchange) throws Exception {
-        var body     = mapper.readTree(exchange.getRequestBody());
-        int libroId  = body.path("libroId").asInt();
+    private void handleSuscribir(HttpExchange ex) throws Exception {
+        var body      = mapper.readTree(ex.getRequestBody());
+        int libroId   = body.path("libroId").asInt();
         int usuarioId = body.path("usuarioId").asInt();
-        boolean ok   = libroN.suscribirUsuario(libroId, usuarioId);
-        sendResponse(exchange, ok ? 201 : 409, "{\"ok\":" + ok + "}");
+        String email  = body.path("email").asText("");   // ← leer email del body
+
+        if (libroId == 0 || usuarioId == 0) {
+            sendResponse(ex, 400, "{\"error\":\"libroId y usuarioId son requeridos\"}");
+            return;
+        }
+
+        boolean ok = libroN.suscribirUsuario(libroId, usuarioId, email);
+        sendResponse(ex, ok ? 201 : 409, "{\"ok\":" + ok + "}");
     }
 
     // DELETE /lista-espera  body: { "libroId": 5, "usuarioId": 12 }

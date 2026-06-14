@@ -6,15 +6,6 @@ import com.bo.uagrm.datos.entity.Notificacion;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Capa de negocio del ms-notificaciones.
- * Responsabilidades:
- *  1. Recibir la solicitud de notificación desde otro microservicio
- *  2. Persistir la notificación como PENDIENTE
- *  3. Intentar el envío
- *  4. Actualizar el estado (ENVIADA / FALLIDA)
- */
-// negocio/NotificacionN.java
 public class NotificacionN {
 
     private final NotificacionDao dao        = new NotificacionDao();
@@ -27,6 +18,12 @@ public class NotificacionN {
     );
 
     public Notificacion procesarYEnviar(Notificacion notificacion) throws Exception {
+
+        // Garantizar canal por defecto — la columna es NOT NULL
+        // El sistema entrega por SSE; EMAIL/SMS son canales futuros
+        if (notificacion.getCanal() == null || notificacion.getCanal().isBlank()) {
+            notificacion.setCanal("SSE");
+        }
 
         // 1. Persistir como PENDIENTE
         int id = dao.registrar(notificacion);
@@ -52,14 +49,13 @@ public class NotificacionN {
             dao.marcarEnviada(id);
             notificacion.setEstado("ENVIADA");
         } else {
-            // El usuario no está conectado — queda PENDIENTE para cuando entre
+            // Usuario offline — queda PENDIENTE, se entrega al reconectar
             notificacion.setEstado("PENDIENTE");
         }
 
         return notificacion;
     }
 
-    // Al conectarse el usuario, le mandamos sus notificaciones pendientes
     public void enviarPendientesAlConectar(int usuarioId) throws Exception {
         List<Notificacion> pendientes = dao.listarPendientesPorUsuario(usuarioId);
         for (Notificacion n : pendientes) {
@@ -74,11 +70,11 @@ public class NotificacionN {
         }
     }
 
-    public List<Notificacion> listarTodas()                    throws Exception { return dao.listarTodas(); }
-    public List<Notificacion> listarPorUsuario(int uid)        throws Exception { return dao.listarPorUsuario(uid); }
-    public Notificacion       buscarPorId(int id)              throws Exception { return dao.buscarPorId(id); }
-    public int                reintentarPendientes()           throws Exception {
-        // Con SSE: reintenta solo a usuarios conectados ahora
+    public List<Notificacion> listarTodas()             throws Exception { return dao.listarTodas(); }
+    public List<Notificacion> listarPorUsuario(int uid) throws Exception { return dao.listarPorUsuario(uid); }
+    public Notificacion       buscarPorId(int id)       throws Exception { return dao.buscarPorId(id); }
+
+    public int reintentarPendientes() throws Exception {
         List<Notificacion> pendientes = dao.listarPendientes();
         int exitosos = 0;
         for (Notificacion n : pendientes) {

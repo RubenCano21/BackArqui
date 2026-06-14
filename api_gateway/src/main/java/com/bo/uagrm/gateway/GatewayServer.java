@@ -8,11 +8,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 
-/**
- * Punto de entrada del API Gateway.
- * Levanta un servidor HTTP en el puerto configurado y registra
- * un ProxyHandler por cada ruta definida en RouterConfig.
- */
 public class GatewayServer {
 
     public static void main(String[] args) throws Exception {
@@ -20,20 +15,25 @@ public class GatewayServer {
 
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 
-        // Handler especializado para SSE — no usa ProxyHandler normal
-        String notifTarget = RouterConfig.getRoutes()
-                .getOrDefault("/api/notificaciones", "http://localhost:8084");
-        server.createContext("/api/notificaciones/stream", new SseProxyHandler(notifTarget));
-
-        // Registrar cada ruta: prefijo del gateway → microservicio destino
         Map<String, String> routes = RouterConfig.getRoutes();
+        String notifTarget = routes.getOrDefault("/api/notificaciones", "http://localhost:8084");
+        SseProxyHandler sseHandler = new SseProxyHandler(notifTarget);
+
         for (Map.Entry<String, String> entry : routes.entrySet()) {
-            String contextPath = entry.getKey();   // /api/usuarios
-            String targetBase  = entry.getValue(); // http://localhost:8081
-            server.createContext(contextPath, new ProxyHandler(contextPath, targetBase));
+            String contextPath = entry.getKey();
+            String targetBase  = entry.getValue();
+
+            if ("/api/notificaciones".equals(contextPath)) {
+                // Para notificaciones: enrutar /stream al SseProxyHandler,
+                // el resto al ProxyHandler normal — todo desde UN solo contexto
+                server.createContext(contextPath,
+                        new NotificacionesRouter(contextPath, targetBase, sseHandler));
+            } else {
+                server.createContext(contextPath,
+                        new ProxyHandler(contextPath, targetBase));
+            }
         }
 
-        // Thread pool para manejar concurrencia
         server.setExecutor(Executors.newFixedThreadPool(10));
         server.start();
 
@@ -45,7 +45,7 @@ public class GatewayServer {
         routes.forEach((path, target) ->
                 System.out.printf("║  %-18s  →  %-20s ║%n", path, target));
         System.out.printf(  "║  %-18s  →  %-20s ║%n",
-                "/api/notificaciones/stream", "SseProxyHandler");
+                "/api/notificaciones/stream/*", "SseProxyHandler");
         System.out.println("╚══════════════════════════════════════════════╝");
     }
 
@@ -60,11 +60,7 @@ public class GatewayServer {
         if (env != null && !env.isBlank()) return env;
         String sys = System.getProperty("GATEWAY_PORT");
         if (sys != null && !sys.isBlank()) return sys;
-        // Intentar desde properties (clave en minúsculas, ej: gateway_port → GATEWAY_PORT no matchea, usamos el fallback del properties)
         String fromProps = props.getProperty("GATEWAY_PORT".toLowerCase().replace("_", "."));
         return (fromProps != null && !fromProps.isBlank()) ? fromProps : "8080";
     }
 }
-
-// El diseño debe ser totalmente independiente de cada CU,
-// no importa si el CU depende de otros CU

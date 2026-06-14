@@ -103,7 +103,8 @@ public class LibroDao {
 
     // ── Registrar Libro ───────────────────────────────────────────────────────
     public boolean registrarLibro(Libro nuevo) throws Exception {
-        String sql = "INSERT INTO libros(codigo, titulo, anio, edicion, nro_ejemplar, categoria_id, editorial_id, autor_id) " +
+        String sql = "INSERT INTO libros(codigo, titulo, anio, edicion, nro_ejemplar, " +
+                        "categoria_id, editorial_id, autor_id) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

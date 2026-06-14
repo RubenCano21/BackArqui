@@ -5,9 +5,8 @@ import com.bo.uagrm.negocio.controller.NotificacionController;
 import com.sun.net.httpserver.HttpServer;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.Executors;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class NotificacionServer {
 
     public static void main(String[] args) throws Exception {
@@ -16,23 +15,22 @@ public class NotificacionServer {
 
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 
-        server.createContext("/notificaciones",  new NotificacionController());
-        server.createContext("/notificaciones/", new NotificacionController());
+        // ── UNA sola instancia compartida ─────────────────────────────────────
+        NotificacionController controller = new NotificacionController();
+        server.createContext("/notificaciones", controller);
 
-        // En NotificacionServer.java — agregar estas dos líneas
-        server.createContext("/notificaciones/stream",  new NotificacionController());
-        server.createContext("/notificaciones/stream/", new NotificacionController());
-
-        server.setExecutor(null);
+        // Pool de hilos para manejar streams SSE concurrentes sin bloquear el servidor
+        server.setExecutor(Executors.newCachedThreadPool());
         server.start();
 
         System.out.println("╔══════════════════════════════════════════════════════╗");
-        System.out.println("║    ms_notificaciones iniciado en puerto " + port + " ║");
+        System.out.println("║    ms_notificaciones iniciado en puerto " + port + "       ║");
         System.out.println("╠══════════════════════════════════════════════════════╣");
         System.out.println("║  POST   /notificaciones              → enviar        ║");
         System.out.println("║  GET    /notificaciones              → listar todas  ║");
         System.out.println("║  GET    /notificaciones/{id}         → buscar por id ║");
         System.out.println("║  GET    /notificaciones/usuario/{id} → por usuario   ║");
+        System.out.println("║  GET    /notificaciones/stream/{id}  → SSE stream    ║");
         System.out.println("║  POST   /notificaciones/reintentar   → retry fallidas║");
         System.out.println("╚══════════════════════════════════════════════════════╝");
     }

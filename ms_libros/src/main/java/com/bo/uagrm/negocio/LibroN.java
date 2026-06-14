@@ -43,15 +43,16 @@ public class LibroN implements LibroObservable {
 
         if (ok && delta > 0) {
             Libro libro = libroDao.buscarLibroPorId(libroId);
-            if (libro != null && libro.getNroEjemplar() == 1) {
+            if (libro != null) {
                 dispararObserver(libroId, libro.getTitulo());
             }
         }
         return ok;
     }
 
-    public boolean suscribirUsuario(int libroId, int usuarioId) throws Exception {
-        return libroDao.buscarLibroPorId(libroId) != null && listaDao.suscribir(libroId, usuarioId);
+    public boolean suscribirUsuario(int libroId, int usuarioId, String emailUsuario) throws Exception {
+        if (libroDao.buscarLibroPorId(libroId) == null) return false;
+        return listaDao.suscribir(libroId, usuarioId, emailUsuario);
     }
 
     public boolean cancelarSuscripcion(int libroId, int usuarioId) throws Exception {
@@ -74,7 +75,14 @@ public class LibroN implements LibroObservable {
     // Carga suscriptores desde BD, construye observadores y dispara
     private void dispararObserver(int libroId, String titulo) throws Exception {
         List<ListaEspera> espera = listaDao.listarActivosPorLibro(libroId);
-        if (espera.isEmpty()) return;
+
+        if (espera.isEmpty()) {
+            System.out.printf("[Observer] Libro %d devuelto — sin suscriptores en espera%n", libroId);
+            return;
+        }
+
+        System.out.printf("[Observer] Libro %d devuelto — notificando %d suscriptor(es)%n",
+                libroId, espera.size());
 
         for (ListaEspera le : espera) {
             agregarObservador(new NotificadorEmail(le.getIdUsuario(), le.getEmailUsuario()));

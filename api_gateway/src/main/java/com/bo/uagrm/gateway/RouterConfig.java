@@ -52,6 +52,10 @@ public class RouterConfig {
                 env("ROUTE_NOTIFICACIONES_PATH",   props.getProperty("route.notificaciones.path",  "/api/notificaciones")),
                 env("ROUTE_NOTIFICACIONES_TARGET", props.getProperty("route.notificaciones.target", "http://localhost:8084"))
         );
+        ROUTES.put(
+                env("ROUTE_LISTAESPERA_PATH",   props.getProperty("route.listaespera.path",  "/api/lista-espera")),
+                env("ROUTE_LISTAESPERA_TARGET", props.getProperty("route.listaespera.target", "http://localhost:8082"))
+        );
     }
 
     public static Map<String, String> getRoutes() {
