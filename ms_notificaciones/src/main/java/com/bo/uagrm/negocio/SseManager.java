@@ -7,13 +7,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Mantiene las conexiones SSE activas.
- * Clave: usuarioId → conexión HTTP abierta
- */
+
 public class SseManager {
 
-    // Singleton — una sola instancia en todo el servidor
     private static final SseManager INSTANCE = new SseManager();
     public static SseManager getInstance() { return INSTANCE; }
 
@@ -22,7 +18,7 @@ public class SseManager {
 
     private SseManager() {}
 
-    /** Registra la conexión cuando el frontend hace GET /notificaciones/stream/{uid} */
+    // Registra la conexión
     public void registrar(int usuarioId, HttpExchange exchange) {
         conexiones.put(usuarioId, exchange);
         System.out.println("[SSE] Usuario " + usuarioId + " conectado. Activos: " + conexiones.size());

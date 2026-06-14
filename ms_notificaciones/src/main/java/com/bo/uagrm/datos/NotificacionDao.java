@@ -9,7 +9,7 @@ import java.util.List;
 
 public class NotificacionDao {
 
-    // ── Mapeo desde ResultSet ─────────────────────────────────────────────────
+    // ── Mapeo desde ResultSet 
     private Notificacion map(ResultSet rs) throws SQLException {
         Notificacion n = new Notificacion();
         n.setId(rs.getInt("id"));

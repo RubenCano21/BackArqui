@@ -5,7 +5,7 @@ import com.bo.uagrm.datos.ListaEsperaDao;
 import com.bo.uagrm.datos.entity.Libro;
 import com.bo.uagrm.datos.entity.ListaEspera;
 import com.bo.uagrm.negocio.observer.LibroObservable;
-import com.bo.uagrm.negocio.observer.NotificadorEmail;
+import com.bo.uagrm.negocio.observer.Notificador;
 import com.bo.uagrm.negocio.observer.UsuarioObservador;
 
 import java.util.ArrayList;
@@ -85,7 +85,7 @@ public class LibroN implements LibroObservable {
                 libroId, espera.size());
 
         for (ListaEspera le : espera) {
-            agregarObservador(new NotificadorEmail(le.getIdUsuario(), le.getEmailUsuario()));
+            agregarObservador(new Notificador(le.getIdUsuario(), le.getEmailUsuario()));
         }
 
         notificarObservadores(libroId, titulo);
