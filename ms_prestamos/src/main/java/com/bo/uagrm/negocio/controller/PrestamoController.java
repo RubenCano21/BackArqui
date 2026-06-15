@@ -25,14 +25,6 @@ public class PrestamoController implements HttpHandler {
         String method = exchange.getRequestMethod();
         String path   = exchange.getRequestURI().getPath().replaceAll("/$", "");
 
-        // Patrones:
-        //  /prestamos                           → lista / crea
-        //  /prestamos/{id}                      → busca / cancela
-        //  /prestamos/{id}/devolver             → devuelve
-        //  /prestamos/{id}/items                → agrega item
-        //  /prestamos/{id}/items/{libroId}      → elimina item
-        //  /prestamos/estudiante/{estudianteId} → lista por estudiante
-
         try {
             // GET /prestamos/estudiante/{id}
             if (path.matches("^/prestamos/estudiante/\\d+$") && "GET".equals(method)) {

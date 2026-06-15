@@ -17,7 +17,6 @@ public class Prestamo {
     private Date fechaDevolucionReal;
     private String estado;
     private int usuarioId;
-    // Items del préstamo (se cargan en la capa de negocio)
     private List<PrestamoItem> items = new ArrayList<>();
 
     public Prestamo() {}

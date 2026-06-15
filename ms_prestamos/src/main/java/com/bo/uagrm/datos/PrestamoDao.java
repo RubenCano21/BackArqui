@@ -47,8 +47,6 @@ public class PrestamoDao {
         return items;
     }
 
-    // ── Listar todos los préstamos ────────────────────────────────────────────
-
     public List<Prestamo> listarPrestamos() throws Exception {
         List<Prestamo> lista = new ArrayList<>();
         String sql = "SELECT * FROM prestamos ORDER BY id";
@@ -63,8 +61,6 @@ public class PrestamoDao {
         }
         return lista;
     }
-
-    // ── Listar préstamos por estudiante ───────────────────────────────────────
 
     public List<Prestamo> listarPorUsuario(int usuarioId) throws Exception {
         List<Prestamo> lista = new ArrayList<>();
@@ -83,7 +79,6 @@ public class PrestamoDao {
         return lista;
     }
 
-    // ── Buscar préstamo por ID ────────────────────────────────────────────────
 
     public Prestamo buscarPorId(int id) throws Exception {
         String sql = "SELECT * FROM prestamos WHERE id = ?";
@@ -101,7 +96,6 @@ public class PrestamoDao {
         return null;
     }
 
-    // ── Contar cuántas copias de un libro están actualmente prestadas ─────────
 
     public int contarPrestamosActivosPorLibro(int libroId) throws Exception {
         String sql = "SELECT COUNT(*) FROM prestamo_items pi " +
@@ -116,7 +110,6 @@ public class PrestamoDao {
         }
     }
 
-    // ── Verificar si un estudiante tiene un préstamo PENDIENTE ───────────────
 
     public boolean tienePrestamoPendiente(int usuarioId) throws Exception {
         String sql = "SELECT 1 FROM prestamos WHERE usuario_id = ? AND estado = 'PENDIENTE' LIMIT 1";

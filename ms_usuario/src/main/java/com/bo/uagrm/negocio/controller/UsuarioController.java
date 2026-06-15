@@ -156,8 +156,6 @@ public class UsuarioController implements HttpHandler {
         }
     }
 
-
-
     //Utils
     private <T> T readBody(HttpExchange exchange, Class<T> clazz) throws Exception {
         try (InputStream is = exchange.getRequestBody()) {

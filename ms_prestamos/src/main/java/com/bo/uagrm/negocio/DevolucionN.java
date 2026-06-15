@@ -13,13 +13,11 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /**
  * Contexto del patrón Strategy para el cálculo de multas.
- *
  * Responsabilidades:
  *  1. Marcar el préstamo como DEVUELTO en BD.
  *  2. Calcular días de retraso.
@@ -30,17 +28,12 @@ import java.util.List;
  */
 public class DevolucionN {
 
-    // ── Setter de estrategia (inyección desde fuera o auto-selección) ─────────
+    // ── Setter de estrategia
     @Setter
     private EstrategiaCalculoMulta estrategia;
     private final PrestamoDao prestamoDao = new PrestamoDao();
     private final MultaDao    multaDao    = new MultaDao();
 
-    /**
-     * Selecciona la estrategia automáticamente consultando el rol del usuario
-     * en ms_usuario. Si no se puede determinar el rol, se usa la más estricta
-     * (ESTUDIANTE) como fallback seguro.
-     */
     public EstrategiaCalculoMulta obtenerEstrategia(int usuarioId) {
         try {
             List<String> roles = MsClient.obtenerRoles(usuarioId);
@@ -50,18 +43,9 @@ public class DevolucionN {
             System.err.printf("[DevolucionN] No se pudo obtener rol del usuario %d: %s%n",
                     usuarioId, e.getMessage());
         }
-        return new MultaEstudiante(); // fallback
+        return new MultaEstudiante();
     }
 
-    /**
-     * Procesa la devolución completa:
-     *  - Marca el préstamo DEVUELTO
-     *  - Calcula la multa con la estrategia del rol
-     *  - Persiste la multa si hay retraso
-     *  - Libera ejemplares en ms_libros
-     *
-     * @return la Multa generada (montoCalculado = 0 si devolvió a tiempo)
-     */
     public Multa registrarDevolucion(int prestamoId) throws Exception {
         // 1. Verificar que el préstamo existe y está PENDIENTE
         Prestamo prestamo = prestamoDao.buscarPorId(prestamoId);
@@ -137,7 +121,6 @@ public class DevolucionN {
 
     private int calcularDiasRetraso(Prestamo prestamo) {
         if (prestamo.getFechaEntregaPrevista() == null) return 0;
-        // java.sql.Date no soporta toInstant() — usar toLocalDate() directamente
         LocalDate entregaPrevista = ((java.sql.Date) prestamo.getFechaEntregaPrevista()).toLocalDate();
         LocalDate hoy = LocalDate.now();
         long dias = ChronoUnit.DAYS.between(entregaPrevista, hoy);
