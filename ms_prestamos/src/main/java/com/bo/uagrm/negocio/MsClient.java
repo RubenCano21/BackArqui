@@ -1,9 +1,13 @@
 package com.bo.uagrm.negocio;
 
 import com.bo.uagrm.commons.JsonConfig;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -85,7 +89,7 @@ public class MsClient {
             JsonNode node = JsonConfig.getMapper().readTree(body);
             JsonNode titulo = node.get("titulo");
             return (titulo != null && !titulo.isNull()) ? titulo.asText() : "ID " + libroId;
-        } catch (java.net.ConnectException e) {
+        } catch (ConnectException e) {
             return "ID " + libroId;
         } finally {
             if (conn != null) conn.disconnect();
@@ -115,7 +119,7 @@ public class MsClient {
             if (response.statusCode() != 200) {
                 throw new IllegalStateException("Error al actualizar ejemplares en ms_libros (HTTP " + response.statusCode() + ")");
             }
-        } catch (java.net.ConnectException e) {
+        } catch (ConnectException e) {
             throw new IllegalStateException("No se pudo conectar a ms_libros para actualizar ejemplares.");
         }
     }
@@ -144,7 +148,7 @@ public class MsClient {
             if (nro == null || nro.isNull()) return 0;
             return nro.asInt(0);
 
-        } catch (java.net.ConnectException e) {
+        } catch (ConnectException e) {
             throw new IllegalStateException("No se pudo conectar a ms_libros. Verifique que el servicio esté activo.");
         } finally {
             if (conn != null) conn.disconnect();
@@ -162,7 +166,7 @@ public class MsClient {
             conn.setReadTimeout(3000);
             conn.setRequestProperty("Accept", "application/json");
             return conn.getResponseCode() == 200;
-        } catch (java.net.ConnectException e) {
+        } catch (ConnectException e) {
             throw new IllegalStateException("No se pudo conectar al microservicio: " + urlStr +
                     ". Verifique que el servicio esté activo.");
         } finally {
@@ -186,8 +190,8 @@ public class MsClient {
 
         try (java.io.InputStream is = conn.getInputStream()) {
             // La respuesta es un array JSON: ["ESTUDIANTE"] → parseamos con Jackson
-            com.fasterxml.jackson.databind.ObjectMapper om = com.bo.uagrm.commons.JsonConfig.getMapper();
-            return om.readValue(is, new com.fasterxml.jackson.core.type.TypeReference<List<String>>() {});
+            ObjectMapper om = JsonConfig.getMapper();
+            return om.readValue(is, new TypeReference<List<String>>() {});
         }
     }
 
@@ -196,7 +200,7 @@ public class MsClient {
      * El usuario verá un toast con el monto en su dashboard.
      */
     public static void notificarMulta(int usuarioId, int prestamoId,
-                                      java.math.BigDecimal monto, String tipoCalculo) throws Exception {
+                                      BigDecimal monto, String tipoCalculo) throws Exception {
         String body = String.format(
                 "{\"usuarioId\":%d,\"tipo\":\"MULTA_GENERADA\",\"canal\":\"SSE\"," +
                         "\"mensaje\":\"Se generó una multa de %.2f Bs por devolución tardía (préstamo #%d, tarifa: %s).\","+

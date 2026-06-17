@@ -1,7 +1,5 @@
 package com.bo.uagrm.negocio;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.bo.uagrm.commons.JsonConfig;
 
 import java.io.InputStream;
 import java.net.URI;

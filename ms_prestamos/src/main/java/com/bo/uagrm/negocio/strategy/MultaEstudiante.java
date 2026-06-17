@@ -8,7 +8,7 @@ import java.math.BigDecimal;
  */
 public class MultaEstudiante implements EstrategiaCalculoMulta {
 
-    private static final int        DIAS_GRACIA   = 0;
+    private static final int DIAS_GRACIA   = 0;
     private static final BigDecimal MONTO_POR_DIA = new BigDecimal("2.00");
 
     @Override

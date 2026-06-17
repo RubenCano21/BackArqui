@@ -11,11 +11,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
-/**
- * Maneja PUT /prestamos/{id}/devolver
- * Delega toda la lógica a DevolucionN (Contexto del patrón Strategy).
- * El controlador se mantiene delgado: solo rutea, convierte y responde.
- */
 public class DevolucionController implements HttpHandler {
 
     private final DevolucionN devolucionN = new DevolucionN();

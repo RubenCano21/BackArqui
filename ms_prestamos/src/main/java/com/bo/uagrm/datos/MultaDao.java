@@ -61,7 +61,7 @@ public class MultaDao {
         String sql = """
             SELECT m.* FROM multas m
             INNER JOIN prestamos p ON p.id = m.prestamo_id
-            WHERE p.estudiante_id = ?
+            WHERE p.usuario_id = ?
             ORDER BY m.fecha_creacion DESC
             """;
         try (Connection conn = ConnectionDB.getConnection();
