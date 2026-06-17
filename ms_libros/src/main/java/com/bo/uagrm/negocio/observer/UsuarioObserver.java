@@ -1,6 +1,6 @@
 package com.bo.uagrm.negocio.observer;
 
-public interface UsuarioObservador {
+public interface UsuarioObserver {
 
     void notificarDisponibilidad( int libroId, String tituloLibro);
 }

@@ -9,13 +9,13 @@ import lombok.Getter;
  * notificación a MsClient, que centraliza todas las llamadas HTTP
  * salientes de ms_libros (igual que en ms_prestamos).
  */
-public class Notificador implements UsuarioObservador {
+public class NotificadorObserver implements UsuarioObserver {
 
     @Getter
     private final int    usuarioId;
     private final String email;
 
-    public Notificador(int usuarioId, String email) {
+    public NotificadorObserver(int usuarioId, String email) {
         this.usuarioId = usuarioId;
         this.email     = email;
     }

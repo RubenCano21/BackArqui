@@ -5,18 +5,17 @@ import com.bo.uagrm.datos.ListaEsperaDao;
 import com.bo.uagrm.datos.entity.Libro;
 import com.bo.uagrm.datos.entity.ListaEspera;
 import com.bo.uagrm.negocio.observer.LibroObservable;
-import com.bo.uagrm.negocio.observer.Notificador;
-import com.bo.uagrm.negocio.observer.UsuarioObservador;
+import com.bo.uagrm.negocio.observer.LibroObservableImpl;
+import com.bo.uagrm.negocio.observer.NotificadorObserver;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class LibroN implements LibroObservable {
+public class LibroN {
 
     private final LibroDao libroDao = new LibroDao();
     private final ListaEsperaDao listaDao = new ListaEsperaDao();
 
-    private final List<UsuarioObservador> observadores = new ArrayList<>();
+    private final LibroObservable libroObservable = new LibroObservableImpl();
 
     public List<Libro> listarLibros() throws Exception {
         return libroDao.listarLibros();
@@ -59,19 +58,6 @@ public class LibroN implements LibroObservable {
             return listaDao.cancelarSuscripcion(libroId, usuarioId);
     }
 
-    @Override
-    public void agregarObservador(UsuarioObservador o) {
-        observadores.add(o);
-    }
-
-    @Override
-    public void notificarObservadores(int libroId, String tituloLibro) {
-        for (UsuarioObservador o : observadores) {
-            o.notificarDisponibilidad(libroId, tituloLibro);
-        }
-        observadores.clear();
-    }
-
     // Carga suscriptores desde BD, construye observadores y dispara
     private void dispararObserver(int libroId, String titulo) throws Exception {
         List<ListaEspera> espera = listaDao.listarActivosPorLibro(libroId);
@@ -85,10 +71,10 @@ public class LibroN implements LibroObservable {
                 libroId, espera.size());
 
         for (ListaEspera le : espera) {
-            agregarObservador(new Notificador(le.getIdUsuario(), le.getEmailUsuario()));
+            libroObservable.agregarObservador(new NotificadorObserver(le.getIdUsuario(), le.getEmailUsuario()));
         }
 
-        notificarObservadores(libroId, titulo);
+        libroObservable.notificarObservadores(libroId, titulo);
         listaDao.marcarNotificados(libroId);
     }
 }

@@ -2,6 +2,7 @@ package com.bo.uagrm.negocio.observer;
 
 public interface LibroObservable {
 
-    void agregarObservador( UsuarioObservador o);
+    void agregarObservador( UsuarioObserver o);
+    void removeObservador( UsuarioObserver o);
     void notificarObservadores(int libroId, String tituloLibro);
 }
